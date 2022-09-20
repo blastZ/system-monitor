@@ -9,8 +9,8 @@
 namespace NCursesDisplay {
 void Display(System &system, int n = 10);
 void DisplaySystem(System &system, WINDOW *window);
-void DisplayProcess(std::vector<Process> &processes, WINDOW *window, int n);
-std::string PorgressBar(float percent);
+void DisplayProcesses(std::vector<Process> &processes, WINDOW *window, int n);
+std::string ProgressBar(float percent);
 };  // namespace NCursesDisplay
 
 #endif
