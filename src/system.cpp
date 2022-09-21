@@ -48,8 +48,56 @@ std::string System::Kernel() {
   return kernel_version;
 }
 
-// TODO: Return the system's memory utilization
-float System::MemoryUtilization() { return 0.0; }
+float System::MemoryUtilization() {
+  int mem_total_number = 0;
+  int mem_free_number = 0;
+
+  std::ifstream mem_file;
+
+  mem_file.open("/proc/meminfo");
+
+  if (mem_file.is_open()) {
+    if (mem_file.good()) {
+      string mem_total_str;
+      std::getline(mem_file, mem_total_str);
+
+      vector<string> segment_list;
+
+      std::stringstream mem_total_stream(mem_total_str);
+
+      while (mem_total_stream.good()) {
+        string segment;
+        std::getline(mem_total_stream, segment, ' ');
+        segment_list.push_back(segment);
+      }
+
+      mem_total_number = std::stoi(segment_list.rbegin()[1]);
+    }
+
+    if (mem_file.good()) {
+      string mem_free_str;
+      std::getline(mem_file, mem_free_str);
+
+      vector<string> segment_list;
+
+      std::stringstream mem_free_stream(mem_free_str);
+
+      while (mem_free_stream.good()) {
+        string segment;
+        std::getline(mem_free_stream, segment, ' ');
+        segment_list.push_back(segment);
+      }
+
+      mem_free_number = std::stoi(segment_list.rbegin()[1]);
+    }
+  }
+
+  if (mem_total_number == 0) {
+    return 0.0f;
+  }
+
+  return (mem_total_number - mem_free_number) * 1.0f / mem_total_number;
+}
 
 std::string System::OperatingSystem() {
   std::ifstream os_file;
