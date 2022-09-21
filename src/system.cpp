@@ -24,8 +24,29 @@ Processor& System::Cpu() { return cpu_; }
 // TODO: Return a container composed of the system's processes
 vector<Process>& System::Processes() { return processes_; }
 
-// TODO: Return the system's kernel identifier (string)
-std::string System::Kernel() { return string(); }
+std::string System::Kernel() {
+  string kernel_version = "";
+
+  std::ifstream kernel_file;
+
+  kernel_file.open("/proc/version");
+
+  if (kernel_file.is_open()) {
+    vector<string> segment_list;
+
+    while (kernel_file.good()) {
+      string kernel_string;
+
+      std::getline(kernel_file, kernel_string, ' ');
+
+      segment_list.push_back(kernel_string);
+    }
+
+    kernel_version = segment_list[2];
+  }
+
+  return kernel_version;
+}
 
 // TODO: Return the system's memory utilization
 float System::MemoryUtilization() { return 0.0; }
@@ -41,10 +62,12 @@ std::string System::OperatingSystem() {
       std::getline(os_file, os_line);
 
       std::stringstream os_line_stream(os_line);
-      string segment;
       vector<string> segment_list;
 
-      while (std::getline(os_line_stream, segment, '=')) {
+      while (os_line_stream.good()) {
+        string segment;
+        std::getline(os_line_stream, segment, '=');
+
         segment_list.push_back(segment);
       }
 
