@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "../include/format.h"
 #include "../include/process.h"
 #include "../include/processor.h"
 
@@ -18,27 +19,6 @@ using std::set;
 using std::size_t;
 using std::string;
 using std::vector;
-
-vector<string> GetLineListFromStream(std::istream& stream,
-                                     char delimiter = '\n') {
-  vector<string> line_list;
-
-  while (stream.good()) {
-    string line;
-
-    std::getline(stream, line, delimiter);
-
-    line_list.push_back(line);
-  }
-
-  return line_list;
-}
-
-vector<string> GetLineListFromString(string str, char delimiter) {
-  std::stringstream str_stream(str);
-
-  return GetLineListFromStream(str_stream, delimiter);
-}
 
 // TODO: Return the system's CPU
 Processor& System::Cpu() { return cpu_; }
@@ -150,23 +130,21 @@ std::string System::OperatingSystem() {
   return string();
 }
 
-// TODO: Return the number of processes actively running on the system
-int System::RunningProcesses() { return 0; }
+int System::RunningProcesses() {
+  vector<string> mem_list = Format::GetLineListFromFile("/proc/stat");
+
+  vector<string> mem_item_list =
+      Format::GetLineListFromString(mem_list.rbegin()[3], ' ');
+
+  return std::stoi(mem_item_list[1]);
+}
 
 int System::TotalProcesses() {
-  vector<string> line_list;
-
-  std::ifstream process_stat_file;
-
-  process_stat_file.open("/proc/stat");
-
-  if (process_stat_file.is_open()) {
-    line_list = GetLineListFromStream(process_stat_file);
-  }
+  vector<string> line_list = Format::GetLineListFromFile("/proc/stat");
 
   string processes_str = line_list.rbegin()[4];
 
-  vector<string> str_list = GetLineListFromString(processes_str, ' ');
+  vector<string> str_list = Format::GetLineListFromString(processes_str, ' ');
 
   return std::stoi(str_list[1]);
 }
