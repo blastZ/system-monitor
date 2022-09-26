@@ -8,11 +8,15 @@
 using std::string;
 using std::vector;
 
-// TODO: Complete this helper function
-// INPUT: Long int measuring seconds
-// OUTPUT: HH:MM:SS
-// REMOVE: [[maybe_unused]] once you define the function
-string Format::ElapsedTime(long seconds [[maybe_unused]]) { return string(); }
+string Format::ElapsedTime(long seconds) {
+  // HH:MM:SS
+  int hh = seconds / 3600;
+  int mm = seconds % 3600 / 60;
+  int ss = seconds % 3600 % 60;
+
+  return std::to_string(hh) + ":" + std::to_string(mm) + ":" +
+         std::to_string(ss);
+}
 
 vector<string> Format::GetLineListFromStream(std::istream& stream,
                                              char delimiter) {

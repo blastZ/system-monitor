@@ -149,5 +149,11 @@ int System::TotalProcesses() {
   return std::stoi(str_list[1]);
 }
 
-// TODO: Return the number of seconds since the system started running
-long int System::UpTime() { return 0; }
+long int System::UpTime() {
+  vector<string> uptime_list = Format::GetLineListFromFile("/proc/uptime");
+
+  vector<string> uptime_item_list =
+      Format::GetLineListFromString(uptime_list[0], ' ');
+
+  return std::stol(uptime_item_list[0]);
+}
