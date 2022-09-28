@@ -4,13 +4,13 @@
 #include <string>
 #include <thread>
 
-#include "../include/format.h"
+#include "../include/linux_parser.h"
 
 vector<int> Processor::GetTotalFromStatFile() {
-  vector<string> stat_list = Format::GetLineListFromFile("/proc/stat");
+  vector<string> stat_list = LinuxParser::GetLineListFromFile("/proc/stat");
 
   vector<string> cpu_stat_list =
-      Format::GetLineListFromString(stat_list[0], ' ');
+      LinuxParser::GetLineListFromString(stat_list[0], ' ');
 
   cpu_stat_list.erase(cpu_stat_list.begin());
   cpu_stat_list.erase(cpu_stat_list.begin());
