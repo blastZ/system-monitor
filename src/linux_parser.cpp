@@ -3,6 +3,7 @@
 #include <dirent.h>
 #include <unistd.h>
 
+#include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -114,21 +115,55 @@ long LinuxParser::UpTime() {
   return std::stol(uptime);
 }
 
-// TODO: Read and return the number of jiffies for the system
-long LinuxParser::Jiffies() { return 0; }
+long LinuxParser::Jiffies() { return ActiveJiffies() + IdleJiffies(); }
 
 // TODO: Read and return the number of active jiffies for a PID
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::ActiveJiffies(int pid [[maybe_unused]]) { return 0; }
 
-// TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
+long LinuxParser::ActiveJiffies() {
+  vector<string> cpu_states = CpuUtilization();
 
-// TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
+  return std::stol(cpu_states[CPUStates::kUser_]) +
+         std::stol(cpu_states[CPUStates::kNice_]) +
+         std::stol(cpu_states[CPUStates::kSystem_]) +
+         std::stol(cpu_states[CPUStates::kIRQ_]) +
+         std::stol(cpu_states[CPUStates::kSoftIRQ_]) +
+         std::stol(cpu_states[CPUStates::kSteal_]);
+}
 
-// TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+long LinuxParser::IdleJiffies() {
+  vector<string> cpu_states = CpuUtilization();
+
+  return std::stol(cpu_states[CPUStates::kIdle_]) +
+         std::stol(cpu_states[CPUStates::kIOwait_]);
+}
+
+vector<string> LinuxParser::CpuUtilization() {
+  std::ifstream stream(kProcDirectory + kStatFilename);
+
+  string line;
+
+  vector<string> cpu_states{"0", "0", "0", "0", "0", "0", "0", "0", "0", "0"};
+
+  if (stream.is_open()) {
+    std::getline(stream, line);
+
+    std::istringstream linestream(line);
+
+    string temp;
+    linestream >> temp;
+    cpu_states.clear();
+
+    for (int i = 0; i <= CPUStates::kGuestNice_; i++) {
+      string value;
+      linestream >> value;
+      cpu_states.push_back(value);
+    }
+  }
+
+  return cpu_states;
+}
 
 int LinuxParser::TotalProcesses() {
   string total = "0";
@@ -217,39 +252,3 @@ string LinuxParser::User(int pid) {
 // TODO: Read and return the uptime of a process
 // REMOVE: [[maybe_unused]] once you define the function
 long LinuxParser::UpTime(int pid [[maybe_unused]]) { return 0; }
-
-vector<string> LinuxParser::GetLineListFromStream(std::istream& stream,
-                                                  char delimiter) {
-  vector<string> line_list{};
-
-  while (stream.good()) {
-    string line;
-
-    std::getline(stream, line, delimiter);
-
-    line_list.push_back(line);
-  }
-
-  return line_list;
-}
-
-vector<string> LinuxParser::GetLineListFromString(string str, char delimiter) {
-  std::stringstream str_stream(str);
-
-  return GetLineListFromStream(str_stream, delimiter);
-}
-
-vector<string> LinuxParser::GetLineListFromFile(string file_path,
-                                                char delimiter) {
-  std::ifstream file_stream;
-
-  file_stream.open(file_path);
-
-  vector<string> line_list{};
-
-  if (file_stream.is_open()) {
-    line_list = GetLineListFromStream(file_stream, delimiter);
-  }
-
-  return line_list;
-}

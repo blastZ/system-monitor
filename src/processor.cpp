@@ -6,33 +6,17 @@
 
 #include "../include/linux_parser.h"
 
-vector<int> Processor::GetTotalFromStatFile() {
-  vector<string> stat_list = LinuxParser::GetLineListFromFile("/proc/stat");
-
-  vector<string> cpu_stat_list =
-      LinuxParser::GetLineListFromString(stat_list[0], ' ');
-
-  cpu_stat_list.erase(cpu_stat_list.begin());
-  cpu_stat_list.erase(cpu_stat_list.begin());
-
-  int idle = std::stoi(cpu_stat_list[3]) + std::stoi(cpu_stat_list[4]);
-  int non_idle = std::stoi(cpu_stat_list[0]) + std::stoi(cpu_stat_list[1]) +
-                 std::stoi(cpu_stat_list[2]) + std::stoi(cpu_stat_list[5]) +
-                 std::stoi(cpu_stat_list[6]) + std::stoi(cpu_stat_list[7]);
-  int total = idle + non_idle;
-
-  return vector<int>{total, idle};
-}
-
 float Processor::Utilization() {
-  vector<int> pre = GetTotalFromStatFile();
+  long total = LinuxParser::Jiffies();
+  long active = LinuxParser::ActiveJiffies();
 
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-  vector<int> now = GetTotalFromStatFile();
+  long total_now = LinuxParser::Jiffies();
+  long active_now = LinuxParser::ActiveJiffies();
 
-  int totald = now[0] - pre[0];
-  int idled = now[1] - pre[1];
+  int totald = total_now - total;
+  int actived = active_now - active;
 
-  return (totald - idled) * 1.0f / totald;
+  return actived * 1.0f / totald;
 }

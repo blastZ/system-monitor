@@ -56,12 +56,6 @@ std::string Ram(int pid);
 std::string Uid(int pid);
 std::string User(int pid);
 long int UpTime(int pid);
-
-// Common
-vector<string> GetLineListFromStream(std::istream& stream,
-                                     char delimiter = '\n');
-vector<string> GetLineListFromString(string str, char delimiter = '\n');
-vector<string> GetLineListFromFile(string file_path, char delimiter = '\n');
 };  // namespace LinuxParser
 
 #endif

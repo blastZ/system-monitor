@@ -8,7 +8,6 @@ class Processor {
   float Utilization();
 
  private:
-  std::vector<int> GetTotalFromStatFile();
 };
 
 #endif

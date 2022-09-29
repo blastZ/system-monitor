@@ -7,7 +7,5 @@
 int main() {
   System system;
 
-  // std::cout << LinuxParser::MemoryUtilization() << std::endl;
-
   NCursesDisplay::Display(system);
 }

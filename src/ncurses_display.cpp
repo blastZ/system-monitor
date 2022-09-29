@@ -85,6 +85,8 @@ void NCursesDisplay::DisplayProcesses(std::vector<Process>& processes,
     mvwprintw(window, row, command_column,
               processes[i].Command().substr(0, window->_maxx - 46).c_str());
   }
+
+  wrefresh(window);
 }
 
 void NCursesDisplay::Display(System& system, int n) {
@@ -92,6 +94,7 @@ void NCursesDisplay::Display(System& system, int n) {
   noecho();       // do not print input values
   cbreak();       // terminate ncurses on ctrl + c
   start_color();  // enable color
+  curs_set(0);
 
   int x_max{getmaxx(stdscr)};
   WINDOW* system_window = newwin(9, x_max - 1, 0, 0);
@@ -103,11 +106,10 @@ void NCursesDisplay::Display(System& system, int n) {
     init_pair(2, COLOR_GREEN, COLOR_BLACK);
     box(system_window, 0, 0);
     box(process_window, 0, 0);
+
     DisplaySystem(system, system_window);
     DisplayProcesses(system.Processes(), process_window, n);
-    wrefresh(system_window);
-    wrefresh(process_window);
-    refresh();
+
     std::this_thread::sleep_for(std::chrono::seconds(1));
   }
   endwin();
