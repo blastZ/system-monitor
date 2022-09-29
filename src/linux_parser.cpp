@@ -70,24 +70,48 @@ vector<int> LinuxParser::Pids() {
 }
 
 float LinuxParser::MemoryUtilization() {
-  vector<string> meminfo_list =
-      GetLineListFromFile(kProcDirectory + kMeminfoFilename);
+  int total = 1;
+  int free = 1;
 
-  vector<string> memtotal_list = GetLineListFromString(meminfo_list[0], ' ');
-  int memtotal = std::stoi(memtotal_list.rbegin()[1]);
+  std::ifstream stream(kProcDirectory + kMeminfoFilename);
 
-  vector<string> memfree_list = GetLineListFromString(meminfo_list[1], ' ');
-  int memfree = std::stoi(memfree_list.rbegin()[1]);
+  string total_line;
+  string free_line;
+  string total_str, free_str;
 
-  return (memtotal - memfree) * 1.0f / memtotal;
+  if (stream.is_open()) {
+    std::getline(stream, total_line);
+    std::getline(stream, free_line);
+
+    std::istringstream total_linestream(total_line);
+    std::istringstream free_linestream(free_line);
+
+    total_linestream >> total_str >> total_str;
+    free_linestream >> free_str >> free_str;
+
+    total = std::stoi(total_str);
+    free = std::stoi(free_str);
+  }
+
+  return (total - free) * 1.0f / total;
 }
 
 long LinuxParser::UpTime() {
-  vector<string> uptime_list = GetLineListFromFile("/proc/uptime");
+  string uptime = "0";
 
-  vector<string> uptime_item_list = GetLineListFromString(uptime_list[0], ' ');
+  std::ifstream stream(kProcDirectory + kUptimeFilename);
 
-  return std::stol(uptime_item_list[0]);
+  string line;
+
+  if (stream.is_open()) {
+    std::getline(stream, line);
+
+    std::istringstream linestream(line);
+
+    linestream >> uptime;
+  }
+
+  return std::stol(uptime);
 }
 
 // TODO: Read and return the number of jiffies for the system
@@ -107,22 +131,51 @@ long LinuxParser::IdleJiffies() { return 0; }
 vector<string> LinuxParser::CpuUtilization() { return {}; }
 
 int LinuxParser::TotalProcesses() {
-  vector<string> line_list = GetLineListFromFile("/proc/stat");
+  string total = "0";
 
-  string processes_str = line_list.rbegin()[4];
+  std::ifstream stream(kProcDirectory + kStatFilename);
 
-  vector<string> str_list = GetLineListFromString(processes_str, ' ');
+  string line;
+  string key, value;
 
-  return std::stoi(str_list[1]);
+  if (stream.is_open()) {
+    while (std::getline(stream, line)) {
+      std::istringstream linestream(line);
+
+      linestream >> key >> value;
+
+      if (key == "processes") {
+        total = value;
+        break;
+      }
+    }
+  }
+
+  return std::stoi(total);
 }
 
 int LinuxParser::RunningProcesses() {
-  vector<string> mem_list = GetLineListFromFile("/proc/stat");
+  string running = "0";
 
-  vector<string> mem_item_list =
-      GetLineListFromString(mem_list.rbegin()[3], ' ');
+  std::ifstream stream(kProcDirectory + kStatFilename);
 
-  return std::stoi(mem_item_list[1]);
+  string line;
+  string key, value;
+
+  if (stream.is_open()) {
+    while (std::getline(stream, line)) {
+      std::istringstream linestream(line);
+
+      linestream >> key >> value;
+
+      if (key == "procs_running") {
+        running = value;
+        break;
+      }
+    }
+  }
+
+  return std::stoi(running);
 }
 
 // TODO: Read and return the command associated with a process
@@ -138,6 +191,8 @@ string LinuxParser::Ram(int pid [[maybe_unused]]) { return string(); }
 string LinuxParser::Uid(int pid [[maybe_unused]]) { return string(); }
 
 string LinuxParser::User(int pid) {
+  string user = "";
+
   std::ifstream stream(kProcDirectory + std::to_string(pid) + kStatusFilename);
 
   string line;
@@ -150,12 +205,13 @@ string LinuxParser::User(int pid) {
       linestream >> key >> value;
 
       if (key == "Uid:") {
+        user = value;
         break;
       }
     }
   }
 
-  return value;
+  return user;
 }
 
 // TODO: Read and return the uptime of a process

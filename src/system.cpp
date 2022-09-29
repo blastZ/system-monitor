@@ -9,7 +9,6 @@
 // TODO: Return the system's CPU
 Processor& System::Cpu() { return cpu_; }
 
-// TODO: Return a container composed of the system's processes
 vector<Process>& System::Processes() {
   vector<int> pids = LinuxParser::Pids();
 
