@@ -246,7 +246,29 @@ string LinuxParser::User(int pid) {
     }
   }
 
-  return user;
+  std::ifstream pwdstream(kPasswordPath);
+
+  string username = "";
+
+  if (pwdstream.is_open()) {
+    string pwdline;
+
+    while (std::getline(pwdstream, pwdline)) {
+      std::replace(pwdline.begin(), pwdline.end(), ':', ' ');
+
+      string uname, pwd, uid;
+
+      std::istringstream pwdlinestream(pwdline);
+      pwdlinestream >> uname >> pwd >> uid;
+
+      if (uid == user) {
+        username = uname;
+        break;
+      }
+    };
+  }
+
+  return username;
 }
 
 // TODO: Read and return the uptime of a process
