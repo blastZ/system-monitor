@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include <cctype>
+#include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -23,6 +24,8 @@ float Process::CpuUtilization() {
 
   utilization = (total_time * 1.0f / sysconf(_SC_CLK_TCK) / seconds);
 
+  cpu_utilization_ = utilization;
+
   return utilization;
 }
 
@@ -39,8 +42,6 @@ long int Process::UpTime() {
          (LinuxParser::UpTime(pid_) / sysconf(_SC_CLK_TCK));
 }
 
-// TODO: Overload the "less than" comparison operator for Process objects
-// REMOVE: [[maybe_unused]] once you define the function
-bool Process::operator<(Process const& a [[maybe_unused]]) const {
-  return true;
+bool Process::operator<(Process const& a) const {
+  return cpu_utilization_ < a.cpu_utilization_;
 }

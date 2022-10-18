@@ -1,5 +1,6 @@
 #include "../include/system.h"
 
+#include <algorithm>
 #include <iostream>
 
 #include "../include/linux_parser.h"
@@ -17,6 +18,8 @@ vector<Process>& System::Processes() {
 
     processes_.push_back(process);
   }
+
+  std::sort(processes_.rbegin(), processes_.rend());
 
   return processes_;
 }
