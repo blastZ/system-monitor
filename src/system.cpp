@@ -7,7 +7,6 @@
 #include "../include/process.h"
 #include "../include/processor.h"
 
-// TODO: Return the system's CPU
 Processor& System::Cpu() { return cpu_; }
 
 vector<Process>& System::Processes() {

@@ -29,8 +29,7 @@ float Process::CpuUtilization() {
   return utilization;
 }
 
-// TODO: Return the command that generated this process
-string Process::Command() { return string(); }
+string Process::Command() { return LinuxParser::Command(pid_); }
 
 string Process::Ram() { return LinuxParser::Ram(pid_); }
 

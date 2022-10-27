@@ -230,9 +230,21 @@ int LinuxParser::RunningProcesses() {
   return std::stoi(running);
 }
 
-// TODO: Read and return the command associated with a process
-// REMOVE: [[maybe_unused]] once you define the function
-string LinuxParser::Command(int pid) { return ""; }
+string LinuxParser::Command(int pid) {
+  string cmd = "";
+
+  std::ifstream stream(kProcDirectory + std::to_string(pid) + kCmdlineFilename);
+
+  if (stream.is_open()) {
+    string line;
+
+    std::getline(stream, line);
+
+    cmd = line;
+  }
+
+  return cmd;
+}
 
 string LinuxParser::Ram(int pid) {
   string mem_str = "0";
